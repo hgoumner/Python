@@ -33,6 +33,7 @@ def extract(files, outpath):
 
 
 if __name__ == '__main__':
+
     app = QApplication([])
     files = QFileDialog.getOpenFileNames(None, "Select PDF file", '', "PDF File (*.pdf)")[0]
 
@@ -40,5 +41,3 @@ if __name__ == '__main__':
     os.mkdir(outdir + '/Images')
 
     extract(files, outdir+'/Images')
-
-    sys.exit(app.exec_())
