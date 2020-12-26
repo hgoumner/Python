@@ -1,4 +1,4 @@
-## import modules
+#%% import modules
 
 from PyQt5.QtWidgets import QApplication, QFileDialog
 import sys
@@ -6,13 +6,12 @@ import os
 import fitz
 
 
-## extract images
+#%% extract images
 
 def extract(files, outpath):
 
     count = 0
     for i in files:
-
         doc = fitz.open(i)
         for f in range(len(doc)):
 
@@ -29,7 +28,8 @@ def extract(files, outpath):
         count += 1
         curprog = (100*count/len(files))
 
-        print('\r[%.0f] %s' % (curprog, '%'))
+        sys.stdout.write('\r[%.0f] %s' % (curprog, '%'))
+        sys.stdout.flush()
 
 
 if __name__ == '__main__':
