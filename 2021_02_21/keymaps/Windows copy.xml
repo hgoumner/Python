@@ -1,0 +1,34 @@
+<keymap version="1" name="Windows copy" parent="$default">
+  <action id="CommentByBlockComment">
+    <keyboard-shortcut first-keystroke="shift ctrl slash" />
+    <keyboard-shortcut first-keystroke="shift ctrl divide" />
+    <keyboard-shortcut first-keystroke="ctrl k" />
+  </action>
+  <action id="CommentByLineComment">
+    <keyboard-shortcut first-keystroke="ctrl slash" />
+    <keyboard-shortcut first-keystroke="ctrl divide" />
+    <keyboard-shortcut first-keystroke="ctrl q" />
+  </action>
+  <action id="MoveTabRight">
+    <keyboard-shortcut first-keystroke="ctrl alt right" />
+  </action>
+  <action id="PythonCellMode.RunCell">
+    <keyboard-shortcut first-keystroke="ctrl #10000c4" />
+  </action>
+  <action id="PythonCellMode.RunCellMoveNext">
+    <keyboard-shortcut first-keystroke="ctrl number_sign" />
+  </action>
+  <action id="PythonCellMode.RunLine">
+    <keyboard-shortcut first-keystroke="ctrl #10000d6" />
+  </action>
+  <action id="PythonCellMode.RunSelection">
+    <keyboard-shortcut first-keystroke="ctrl plus" />
+  </action>
+  <action id="QuickJavaDoc">
+    <mouse-shortcut keystroke="alt button2" />
+  </action>
+  <action id="Run">
+    <keyboard-shortcut first-keystroke="shift f10" />
+    <keyboard-shortcut first-keystroke="ctrl alt numpad0" />
+  </action>
+</keymap>

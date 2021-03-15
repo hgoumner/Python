@@ -1,0 +1,4 @@
+GrepConsole
+IdeaVIM
+izhangzhihao.rainbow.brackets
+net.fhtagn.pycharm.cellmode
