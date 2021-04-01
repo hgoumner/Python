@@ -1,82 +1,106 @@
-#%% import modules
+"""
+PDF processing script
+"""
+
+# import modules
+import os, sys, re
+import fitz
 
 from PyQt5.QtWidgets import QApplication, QFileDialog
-import sys
-import os
-import fitz
-import re
 
+# body
+class Document( object ):
+    """document object"""
 
-#%% extract images
+    def __init__( self, file, outpath ):
+        """object constructor"""
+        self.file     = file
+        self.filename = os.path.splitext( os.path.basename( self.file ) )[0]
+        self.outpath  = outpath
+        self.extract()
 
-def extract(outpath):
+    def ext_text( self, doc ):
+        """method to extract text from document"""
 
-    files = QFileDialog.getOpenFileNames(None, "Select PDF file", '', "PDF File (*.pdf)")[0]
+        pages = []
+        for idx, page in enumerate(doc, start=1):
+            text = page.getText()
+            if re.search( '(figure|fig\.|abbildung|abb\.)', text, re.IGNORECASE ):
+                pages.append( idx )
 
-    for i in files:
+        return pages
 
-        fname = os.path.splitext(os.path.basename(i))[0]
+    def sav_text( self, pages ):
+        """method to save extracted text"""
 
-        with fitz.open(i) as doc:
+        with open( self.outpath + self.filename + '.txt', 'w' ) as text_out:
+            for p in pages:
+                text_out.write( str( p ) )
+                text_out.write( '\n' )
 
-            # export image text
-            pages = []
-            count_t = 0
-            for page in doc:
-                text =  page.getText()
-                if re.search('(figure|fig\.|abbildung|abb\.)', text, re.IGNORECASE):
-                    pages.append(count_t+1)
-                count_t += 1
-            with open(outpath + fname + '.txt', 'w') as text_out:
-                for p in pages:
-                    text_out.write(str(p))
-                    text_out.write('\n')
+    def ext_img( self, doc ):
+        """method to extract image(s) from document"""
 
+        # loop over pages
+        for f in range( len( doc ) ):
 
-            # export images
-            for f in range(len(doc)):
+            tot_ims = len( doc.getPageImageList( f ) )
 
-                tot_ims = len(doc.getPageImageList(f))
+            if tot_ims > 5:
+                for img in doc.getPageImageList( f ):
+                    xref = img[0]
+                    pix = fitz.Pixmap( doc, xref )
+                    if pix.n < 2:  # this is GRAY or RGB
+                        pix.writePNG( self.outpath + self.filename + "_p_%s.png" % (f + 1) )
+                    else:  # CMYK: convert to RGB first
+                        pix1 = fitz.Pixmap( fitz.csRGB, pix )
+                        pix1.writePNG( self.outpath + self.filename + "_p_%s.png" % (f + 1) )
+                        pix1 = None
+                    pix = None
+            else:
+                count_i = 1
+                for img in doc.getPageImageList( f ):
+                    xref = img[0]
+                    pix = fitz.Pixmap( doc, xref )
+                    if pix.n < 2:  # this is GRAY or RGB
+                        pix.writePNG( self.outpath + self.filename + "_p_%s_%s.png" % (f + 1, count_i) )
+                    else:  # CMYK: convert to RGB first
+                        pix1 = fitz.Pixmap( fitz.csRGB, pix )
+                        pix1.writePNG( self.outpath + self.filename + "_p_%s_%s.png" % (f + 1, count_i) )
+                        pix1 = None
+                    pix = None
+                    count_i += 1
 
-                if tot_ims > 5:
-                    for img in doc.getPageImageList(f):
-                        xref = img[0]
-                        pix = fitz.Pixmap(doc, xref)
-                        if pix.n < 2:  # this is GRAY or RGB
-                            pix.writePNG(outpath + fname + "_p_%s.png" % (f + 1))
-                        else:  # CMYK: convert to RGB first
-                            pix1 = fitz.Pixmap(fitz.csRGB, pix)
-                            pix1.writePNG(outpath + fname + "_p_%s.png" % (f + 1))
-                            pix1 = None
-                        pix = None
-                else:
-                    count_i = 1
-                    for img in doc.getPageImageList(f):
-                        xref = img[0]
-                        pix = fitz.Pixmap(doc, xref)
-                        if pix.n < 2:       # this is GRAY or RGB
-                            pix.writePNG(outpath + fname + "_p_%s_%s.png" % (f+1, count_i))
-                        else:               # CMYK: convert to RGB first
-                            pix1 = fitz.Pixmap(fitz.csRGB, pix)
-                            pix1.writePNG(outpath + fname + "_p_%s_%s.png" % (f+1, count_i))
-                            pix1 = None
-                        pix = None
-                        count_i += 1
+    def extract( self ):
+        """method to process file"""
 
-            curprog = (100*(f+1)/len(doc))
+        with fitz.open( self.file ) as doc:
 
-            print('\r' + os.path.basename(i) + ' %.0f %s' % (curprog, '%'))
+            # text
+            pages = self.ext_text( doc )
+            if pages:
+                self.sav_text( pages )
+
+            # images
+            try:    self.ext_img( doc )
+            except: pass
 
 
 def main():
-    app = QApplication([])
+    app = QApplication( [] )
+    files = QFileDialog.getOpenFileNames( None, "Select PDF file", '', "PDF File (*.pdf)" )[0]
     outdir = r'C:\Users\gou\Documents\Transfer_C\Images\\'
-    extract(outdir)
-    sys.exit(app.exec_())
+
+    for idx, f in enumerate(files,start=1):
+        Document( f, outdir )
+        curprog = (100 * idx) / len(files)
+        print( '\r' + os.path.basename(f) + ' %.0f %s' % (curprog, '%') )
+
+    sys.exit( app.exec_() )
+
 
 if __name__ == '__main__':
     main()
-
 
 '''
 def get_text_percentage(file_name: str) -> float:
@@ -110,4 +134,3 @@ if __name__ == "__main__":
     else:
         print("not fully scanned PDF - text is present")
 '''
-
